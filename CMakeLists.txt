@@ -13,5 +13,7 @@ add_executable(ft_scop main.cpp
         Scop_Window.cpp
         Scop_Window.hpp
         Scop_App.cpp
-        Scop_App.hpp)
+        Scop_App.hpp
+        Scope_Pipeline.cpp
+        Scope_Pipeline.hpp)
 target_link_libraries(ft_scop glfw vulkan)
