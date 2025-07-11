@@ -8,6 +8,12 @@ namespace scop {
         init_window();
     }
 
+    void Scop_Window::createWindowSurface(VkInstance instance, VkSurfaceKHR*surface) {
+        if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create window surface");
+        }
+    }
+
     void Scop_Window::init_window() {
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);

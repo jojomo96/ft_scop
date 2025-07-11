@@ -13,6 +13,8 @@ namespace scop {
 
         bool windowShouldClose() {return glfwWindowShouldClose(window);}
 
+        void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+
     private:
         void init_window();
 
