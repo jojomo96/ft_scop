@@ -1,8 +1,10 @@
 #pragma once
+// Enable beta extensions (needed for VK_KHR_portability_subset)
+#define VK_ENABLE_BETA_EXTENSIONS
 
 #include "Scop_Window.hpp"
 
-// std lib headers
+// std-lib headers
 #include <string>
 #include <vector>
 #include <vulkan/vulkan.h>
@@ -25,29 +27,31 @@ struct QueueFamilyIndices {
 class Scop_Device {
 public:
 #ifdef NDEBUG
-  const bool enableValidationLayers = false;
+    const bool enableValidationLayers = false;
 #else
     const bool enableValidationLayers = true;
 #endif
 
-    Scop_Device(Scop_Window &window);
+    explicit Scop_Device(Scop_Window &window);
 
     ~Scop_Device();
 
-    // Not copyable or movable
+    // non-copyable / non-movable
     Scop_Device(const Scop_Device &) = delete;
 
-    void operator=(const Scop_Device &) = delete;
+    Scop_Device &operator=(const Scop_Device &) = delete;
 
     Scop_Device(Scop_Device &&) = delete;
 
     Scop_Device &operator=(Scop_Device &&) = delete;
 
-    VkCommandPool getCommandPool() { return commandPool; }
+    /* simple getters */
     VkDevice device() { return device_; }
     VkSurfaceKHR surface() { return surface_; }
     VkQueue graphicsQueue() { return graphicsQueue_; }
     VkQueue presentQueue() { return presentQueue_; }
+    VkCommandPool getCommandPool() { return commandPool; }
+    VkPhysicalDeviceProperties properties;
 
     SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport(physicalDevice); }
 
@@ -56,15 +60,16 @@ public:
     QueueFamilyIndices findPhysicalQueueFamilies() { return findQueueFamilies(physicalDevice); }
 
     VkFormat findSupportedFormat(
-        const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+        const std::vector<VkFormat> &candidates,
+        VkImageTiling tiling,
+        VkFormatFeatureFlags features);
 
-    // Buffer Helper Functions
-    void createBuffer(
-        VkDeviceSize size,
-        VkBufferUsageFlags usage,
-        VkMemoryPropertyFlags properties,
-        VkBuffer &buffer,
-        VkDeviceMemory &bufferMemory);
+    /* buffer helpers */
+    void createBuffer(VkDeviceSize size,
+                      VkBufferUsageFlags usage,
+                      VkMemoryPropertyFlags properties,
+                      VkBuffer &buffer,
+                      VkDeviceMemory &bufferMemory);
 
     VkCommandBuffer beginSingleTimeCommands();
 
@@ -72,18 +77,19 @@ public:
 
     void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
-    void copyBufferToImage(
-        VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount);
+    void copyBufferToImage(VkBuffer buffer,
+                           VkImage image,
+                           uint32_t width,
+                           uint32_t height,
+                           uint32_t layerCount);
 
-    void createImageWithInfo(
-        const VkImageCreateInfo &imageInfo,
-        VkMemoryPropertyFlags properties,
-        VkImage &image,
-        VkDeviceMemory &imageMemory);
-
-    VkPhysicalDeviceProperties properties;
+    void createImageWithInfo(const VkImageCreateInfo &imageInfo,
+                             VkMemoryPropertyFlags properties,
+                             VkImage &image,
+                             VkDeviceMemory &imageMemory);
 
 private:
+    /* creation steps */
     void createInstance();
 
     void setupDebugMessenger();
@@ -96,7 +102,7 @@ private:
 
     void createCommandPool();
 
-    // helper functions
+    /* helpers */
     bool isDeviceSuitable(VkPhysicalDevice device);
 
     std::vector<const char *> getRequiredExtensions();
@@ -125,6 +131,14 @@ private:
     VkQueue presentQueue_;
 
     const std::vector<const char *> validationLayers = {"VK_LAYER_KHRONOS_validation"};
-    const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+
+#ifdef __APPLE__
+    const std::vector<const char *> deviceExtensions = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+        VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME // required by MoltenVK
+    };
+#else
+    const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+#endif
 };
-} // namespace lve
+} // namespace scop

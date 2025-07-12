@@ -1,24 +1,29 @@
+// Enable beta extensions BEFORE including <vulkan/vulkan.h>
+#define VK_ENABLE_BETA_EXTENSIONS
+
 #include "Scop_Device.hpp"
 
-// std headers
+// std
 #include <cstring>
 #include <iostream>
 #include <set>
 #include <unordered_set>
+
+// vulkan
 #include <vulkan/vulkan.h>
 
 namespace scop {
-// local callback functions
+/* ---------- local debug callback ---------- */
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT messageType,
     const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
     void *pUserData) {
     std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
-
     return VK_FALSE;
 }
 
+/* -------------- helper wrappers -------------- */
 VkResult CreateDebugUtilsMessengerEXT(
     VkInstance instance,
     const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
@@ -46,7 +51,7 @@ void DestroyDebugUtilsMessengerEXT(
     }
 }
 
-// class member functions
+/* -------------- ctor / dtor -------------- */
 Scop_Device::Scop_Device(Scop_Window &window) : window{window} {
     createInstance();
     setupDebugMessenger();
@@ -68,6 +73,7 @@ Scop_Device::~Scop_Device() {
     vkDestroyInstance(instance, nullptr);
 }
 
+/* -------------- instance creation -------------- */
 void Scop_Device::createInstance() {
     if (enableValidationLayers && !checkValidationLayerSupport()) {
         throw std::runtime_error("validation layers requested, but not available!");
@@ -75,7 +81,7 @@ void Scop_Device::createInstance() {
 
     VkApplicationInfo appInfo = {};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = "LittleVulkanEngine App";
+    appInfo.pApplicationName = "ft_scop";
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.pEngineName = "No Engine";
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -88,6 +94,11 @@ void Scop_Device::createInstance() {
     auto extensions = getRequiredExtensions();
     createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
     createInfo.ppEnabledExtensionNames = extensions.data();
+
+#ifdef __APPLE__
+    /* opt-in to portability drivers */
+    createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
 
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
     if (enableValidationLayers) {
@@ -108,13 +119,15 @@ void Scop_Device::createInstance() {
     hasGflwRequiredInstanceExtensions();
 }
 
+/* -------------- physical device selection -------------- */
 void Scop_Device::pickPhysicalDevice() {
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+
     if (deviceCount == 0) {
         throw std::runtime_error("failed to find GPUs with Vulkan support!");
     }
-    std::cout << "Device count: " << deviceCount << std::endl;
+
     std::vector<VkPhysicalDevice> devices(deviceCount);
     vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
 
@@ -124,7 +137,6 @@ void Scop_Device::pickPhysicalDevice() {
             break;
         }
     }
-
     if (physicalDevice == VK_NULL_HANDLE) {
         throw std::runtime_error("failed to find a suitable GPU!");
     }
@@ -133,13 +145,14 @@ void Scop_Device::pickPhysicalDevice() {
     std::cout << "physical device: " << properties.deviceName << std::endl;
 }
 
+/* -------------- logical device -------------- */
 void Scop_Device::createLogicalDevice() {
     QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
-    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily, indices.presentFamily};
-
+    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     float queuePriority = 1.0f;
+
     for (uint32_t queueFamily: uniqueQueueFamilies) {
         VkDeviceQueueCreateInfo queueCreateInfo = {};
         queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -154,16 +167,12 @@ void Scop_Device::createLogicalDevice() {
 
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
     createInfo.pQueueCreateInfos = queueCreateInfos.data();
-
     createInfo.pEnabledFeatures = &deviceFeatures;
     createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
-    // might not really be necessary anymore because device specific validation layers
-    // have been deprecated
     if (enableValidationLayers) {
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
         createInfo.ppEnabledLayerNames = validationLayers.data();
@@ -262,15 +271,17 @@ bool Scop_Device::checkValidationLayerSupport() {
 
 std::vector<const char *> Scop_Device::getRequiredExtensions() {
     uint32_t glfwExtensionCount = 0;
-    const char **glfwExtensions;
-    glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+    const char **glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
     std::vector<const char *> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
     if (enableValidationLayers) {
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     }
-
+#ifdef __APPLE__
+    extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+    extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+#endif
     return extensions;
 }
 
