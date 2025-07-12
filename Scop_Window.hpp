@@ -6,25 +6,26 @@
 #include <GLFW/glfw3.h>
 
 namespace scop {
-    class Scop_Window {
-    public:
-        Scop_Window(std::string name, int width, int height);
-        ~Scop_Window();
+class Scop_Window {
+public:
+    Scop_Window(std::string name, int width, int height);
 
-        bool windowShouldClose() {return glfwWindowShouldClose(window);}
+    ~Scop_Window();
 
-        void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+    bool windowShouldClose() { return glfwWindowShouldClose(window); }
 
-    private:
-        void init_window();
+    void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
 
-        const int width;
-        const int height;
+private:
+    void init_window();
 
-        std::string window_name;
+    const int width;
+    const int height;
 
-        GLFWwindow *window;
-    };
+    std::string window_name;
+
+    GLFWwindow *window;
+};
 } // scop
 
 #endif //SCOP_WINDOW_HPP

@@ -2,6 +2,7 @@
 #define SCOP_APP_HPP
 #include "Scope_Pipeline.hpp"
 #include "Scop_Window.hpp"
+#include "Scop_Device.hpp"
 
 
 namespace scop {
@@ -14,7 +15,13 @@ namespace scop {
 
     private:
         Scop_Window window{"Scop Application", WIDTH, HEIGHT};
-        Scope_Pipeline pipeline{"../shaders/simple_shader.vert.spv", "../shaders/simple_shader.frag.spv"};
+        Scop_Device device{window};
+        Scope_Pipeline pipeline{
+            device,
+            "../shaders/simple_shader.vert.spv",
+            "../shaders/simple_shader.frag.spv",
+            Scope_Pipeline::default_pipeline_config_info(WIDTH, HEIGHT)
+        };
     };
 }
 

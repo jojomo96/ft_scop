@@ -5,7 +5,7 @@
 // std lib headers
 #include <string>
 #include <vector>
-
+#include <vulkan/vulkan.h>
 namespace scop {
     struct SwapChainSupportDetails {
         VkSurfaceCapabilitiesKHR capabilities;
