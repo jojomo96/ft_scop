@@ -5,9 +5,9 @@
 #include "Scop_App.hpp"
 
 namespace scop {
-    void Scop_App::run() {
-        while (!window.windowShouldClose()) {
-            glfwPollEvents();
-        }
+void Scop_App::run() {
+    while (!window.windowShouldClose()) {
+        glfwPollEvents();
     }
+}
 } // namespace scop
