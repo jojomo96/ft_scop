@@ -34,7 +34,7 @@ public:
         const Pipeline_Config_Info &config_info
     );
 
-    ~Scope_Pipeline() = default;
+    ~Scope_Pipeline();
 
     Scope_Pipeline(const Scope_Pipeline &) = delete;
 
