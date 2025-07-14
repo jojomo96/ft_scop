@@ -17,13 +17,18 @@ Scope_Pipeline::Scope_Pipeline(
     create_graphics_pipeline(vert_file_path, frag_file_path, config_info);
 }
 
-Pipeline_Config_Info Scope_Pipeline::default_pipeline_config_info(uint32_t width, uint32_t height) {
+Pipeline_Config_Info Scope_Pipeline::default_pipeline_config_info(
+    uint32_t width,
+    uint32_t height
+) {
     Pipeline_Config_Info config_info;
 
     return config_info;
 }
 
-std::vector<char> Scope_Pipeline::read_file(const std::string &file_path) {
+std::vector<char> Scope_Pipeline::read_file(
+    const std::string &file_path
+) {
     std::ifstream file(file_path, std::ios::ate | std::ios::binary);
 
     if (!file.is_open()) {

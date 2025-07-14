@@ -18,7 +18,8 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT messageType,
     const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-    void *pUserData) {
+    void *pUserData
+) {
     std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
     return VK_FALSE;
 }
@@ -28,10 +29,14 @@ VkResult CreateDebugUtilsMessengerEXT(
     VkInstance instance,
     const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
     const VkAllocationCallbacks *pAllocator,
-    VkDebugUtilsMessengerEXT *pDebugMessenger) {
-    auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
-        instance,
-        "vkCreateDebugUtilsMessengerEXT");
+    VkDebugUtilsMessengerEXT *pDebugMessenger
+) {
+    auto func = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(
+        vkGetInstanceProcAddr(
+            instance,
+            "vkCreateDebugUtilsMessengerEXT"
+        )
+    );
     if (func != nullptr) {
         return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
     } else {
@@ -42,17 +47,23 @@ VkResult CreateDebugUtilsMessengerEXT(
 void DestroyDebugUtilsMessengerEXT(
     VkInstance instance,
     VkDebugUtilsMessengerEXT debugMessenger,
-    const VkAllocationCallbacks *pAllocator) {
-    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
-        instance,
-        "vkDestroyDebugUtilsMessengerEXT");
+    const VkAllocationCallbacks *pAllocator
+) {
+    auto func = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(
+        vkGetInstanceProcAddr(
+            instance,
+            "vkDestroyDebugUtilsMessengerEXT"
+        )
+    );
     if (func != nullptr) {
         func(instance, debugMessenger, pAllocator);
     }
 }
 
 /* -------------- ctor / dtor -------------- */
-Scop_Device::Scop_Device(Scop_Window &window) : window{window} {
+Scop_Device::Scop_Device(
+    Scop_Window &window
+) : window{window} {
     createInstance();
     setupDebugMessenger();
     createSurface();
@@ -204,7 +215,9 @@ void Scop_Device::createCommandPool() {
 
 void Scop_Device::createSurface() { window.createWindowSurface(instance, &surface_); }
 
-bool Scop_Device::isDeviceSuitable(VkPhysicalDevice device) {
+bool Scop_Device::isDeviceSuitable(
+    VkPhysicalDevice device
+) {
     QueueFamilyIndices indices = findQueueFamilies(device);
 
     bool extensionsSupported = checkDeviceExtensionSupport(device);
@@ -223,7 +236,8 @@ bool Scop_Device::isDeviceSuitable(VkPhysicalDevice device) {
 }
 
 void Scop_Device::populateDebugMessengerCreateInfo(
-    VkDebugUtilsMessengerCreateInfoEXT &createInfo) {
+    VkDebugUtilsMessengerCreateInfoEXT &createInfo
+) {
     createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
@@ -308,7 +322,9 @@ void Scop_Device::hasGflwRequiredInstanceExtensions() {
     }
 }
 
-bool Scop_Device::checkDeviceExtensionSupport(VkPhysicalDevice device) {
+bool Scop_Device::checkDeviceExtensionSupport(
+    VkPhysicalDevice device
+) {
     uint32_t extensionCount;
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
 
@@ -317,7 +333,8 @@ bool Scop_Device::checkDeviceExtensionSupport(VkPhysicalDevice device) {
         device,
         nullptr,
         &extensionCount,
-        availableExtensions.data());
+        availableExtensions.data()
+    );
 
     std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
 
@@ -328,7 +345,9 @@ bool Scop_Device::checkDeviceExtensionSupport(VkPhysicalDevice device) {
     return requiredExtensions.empty();
 }
 
-QueueFamilyIndices Scop_Device::findQueueFamilies(VkPhysicalDevice device) {
+QueueFamilyIndices Scop_Device::findQueueFamilies(
+    VkPhysicalDevice device
+) {
     QueueFamilyIndices indices;
 
     uint32_t queueFamilyCount = 0;
@@ -359,7 +378,9 @@ QueueFamilyIndices Scop_Device::findQueueFamilies(VkPhysicalDevice device) {
     return indices;
 }
 
-SwapChainSupportDetails Scop_Device::querySwapChainSupport(VkPhysicalDevice device) {
+SwapChainSupportDetails Scop_Device::querySwapChainSupport(
+    VkPhysicalDevice device
+) {
     SwapChainSupportDetails details;
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface_, &details.capabilities);
 
@@ -380,13 +401,17 @@ SwapChainSupportDetails Scop_Device::querySwapChainSupport(VkPhysicalDevice devi
             device,
             surface_,
             &presentModeCount,
-            details.presentModes.data());
+            details.presentModes.data()
+        );
     }
     return details;
 }
 
 VkFormat Scop_Device::findSupportedFormat(
-    const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
+    const std::vector<VkFormat> &candidates,
+    VkImageTiling tiling,
+    VkFormatFeatureFlags features
+) {
     for (VkFormat format: candidates) {
         VkFormatProperties props;
         vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
@@ -401,7 +426,10 @@ VkFormat Scop_Device::findSupportedFormat(
     throw std::runtime_error("failed to find supported format!");
 }
 
-uint32_t Scop_Device::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
+uint32_t Scop_Device::findMemoryType(
+    uint32_t typeFilter,
+    VkMemoryPropertyFlags properties
+) {
     VkPhysicalDeviceMemoryProperties memProperties;
     vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
     for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
@@ -419,7 +447,8 @@ void Scop_Device::createBuffer(
     VkBufferUsageFlags usage,
     VkMemoryPropertyFlags properties,
     VkBuffer &buffer,
-    VkDeviceMemory &bufferMemory) {
+    VkDeviceMemory &bufferMemory
+) {
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = size;
@@ -463,7 +492,9 @@ VkCommandBuffer Scop_Device::beginSingleTimeCommands() {
     return commandBuffer;
 }
 
-void Scop_Device::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
+void Scop_Device::endSingleTimeCommands(
+    VkCommandBuffer commandBuffer
+) {
     vkEndCommandBuffer(commandBuffer);
 
     VkSubmitInfo submitInfo{};
@@ -477,7 +508,11 @@ void Scop_Device::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
     vkFreeCommandBuffers(device_, commandPool, 1, &commandBuffer);
 }
 
-void Scop_Device::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
+void Scop_Device::copyBuffer(
+    VkBuffer srcBuffer,
+    VkBuffer dstBuffer,
+    VkDeviceSize size
+) {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
     VkBufferCopy copyRegion{};
@@ -490,7 +525,12 @@ void Scop_Device::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSiz
 }
 
 void Scop_Device::copyBufferToImage(
-    VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount) {
+    VkBuffer buffer,
+    VkImage image,
+    uint32_t width,
+    uint32_t height,
+    uint32_t layerCount
+) {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
     VkBufferImageCopy region{};
@@ -512,7 +552,8 @@ void Scop_Device::copyBufferToImage(
         image,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         1,
-        &region);
+        &region
+    );
     endSingleTimeCommands(commandBuffer);
 }
 
@@ -520,7 +561,8 @@ void Scop_Device::createImageWithInfo(
     const VkImageCreateInfo &imageInfo,
     VkMemoryPropertyFlags properties,
     VkImage &image,
-    VkDeviceMemory &imageMemory) {
+    VkDeviceMemory &imageMemory
+) {
     if (vkCreateImage(device_, &imageInfo, nullptr, &image) != VK_SUCCESS) {
         throw std::runtime_error("failed to create image!");
     }
