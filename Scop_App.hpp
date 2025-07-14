@@ -3,6 +3,7 @@
 #include "Scope_Pipeline.hpp"
 #include "Scop_Window.hpp"
 #include "Scop_Device.hpp"
+#include "Scop_Swap_Chain.hpp"
 
 
 namespace scop {
@@ -16,6 +17,7 @@ public:
 private:
     Scop_Window window{"Scop Application", WIDTH, HEIGHT};
     Scop_Device device{window};
+    Scop_Swap_Chain swapChain{device, window.getExtent()};
     Scope_Pipeline pipeline{
         device,
         "../shaders/simple_shader.vert.spv",

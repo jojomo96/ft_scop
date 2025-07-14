@@ -12,7 +12,7 @@
 #include "Scop_Device.hpp"
 
 namespace scop {
-Scop_SwapChain::Scop_SwapChain(Scop_Device &deviceRef, VkExtent2D extent)
+Scop_Swap_Chain::Scop_Swap_Chain(Scop_Device &deviceRef, VkExtent2D extent)
     : device{deviceRef}, windowExtent{extent} {
     createSwapChain();
     createImageViews();
@@ -22,7 +22,7 @@ Scop_SwapChain::Scop_SwapChain(Scop_Device &deviceRef, VkExtent2D extent)
     createSyncObjects();
 }
 
-Scop_SwapChain::~Scop_SwapChain() {
+Scop_Swap_Chain::~Scop_Swap_Chain() {
     for (auto imageView: swapChainImageViews) {
         vkDestroyImageView(device.device(), imageView, nullptr);
     }
@@ -53,7 +53,7 @@ Scop_SwapChain::~Scop_SwapChain() {
     }
 }
 
-VkResult Scop_SwapChain::acquireNextImage(uint32_t *imageIndex) {
+VkResult Scop_Swap_Chain::acquireNextImage(uint32_t *imageIndex) {
     vkWaitForFences(
         device.device(),
         1,
@@ -74,7 +74,7 @@ VkResult Scop_SwapChain::acquireNextImage(uint32_t *imageIndex) {
     return result;
 }
 
-VkResult Scop_SwapChain::submitCommandBuffers(
+VkResult Scop_Swap_Chain::submitCommandBuffers(
     const VkCommandBuffer *buffers,
     uint32_t *imageIndex
 ) {
@@ -124,7 +124,7 @@ VkResult Scop_SwapChain::submitCommandBuffers(
     return result;
 }
 
-void Scop_SwapChain::createSwapChain() {
+void Scop_Swap_Chain::createSwapChain() {
     SwapChainSupportDetails swapChainSupport = device.getSwapChainSupport();
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -185,7 +185,7 @@ void Scop_SwapChain::createSwapChain() {
     swapChainExtent = extent;
 }
 
-void Scop_SwapChain::createImageViews() {
+void Scop_Swap_Chain::createImageViews() {
     swapChainImageViews.resize(swapChainImages.size());
     for (size_t i = 0; i < swapChainImages.size(); i++) {
         VkImageViewCreateInfo viewInfo{};
@@ -206,7 +206,7 @@ void Scop_SwapChain::createImageViews() {
     }
 }
 
-void Scop_SwapChain::createRenderPass() {
+void Scop_Swap_Chain::createRenderPass() {
     VkAttachmentDescription depthAttachment{};
     depthAttachment.format = findDepthFormat();
     depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -267,7 +267,7 @@ void Scop_SwapChain::createRenderPass() {
     }
 }
 
-void Scop_SwapChain::createFramebuffers() {
+void Scop_Swap_Chain::createFramebuffers() {
     swapChainFramebuffers.resize(imageCount());
     for (size_t i = 0; i < imageCount(); i++) {
         std::array<VkImageView, 2> attachments = {swapChainImageViews[i], depthImageViews[i]};
@@ -293,7 +293,7 @@ void Scop_SwapChain::createFramebuffers() {
     }
 }
 
-void Scop_SwapChain::createDepthResources() {
+void Scop_Swap_Chain::createDepthResources() {
     VkFormat depthFormat = findDepthFormat();
     VkExtent2D swapChainExtent = getSwapChainExtent();
 
@@ -342,7 +342,7 @@ void Scop_SwapChain::createDepthResources() {
     }
 }
 
-void Scop_SwapChain::createSyncObjects() {
+void Scop_Swap_Chain::createSyncObjects() {
     imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
@@ -366,7 +366,7 @@ void Scop_SwapChain::createSyncObjects() {
     }
 }
 
-VkSurfaceFormatKHR Scop_SwapChain::chooseSwapSurfaceFormat(
+VkSurfaceFormatKHR Scop_Swap_Chain::chooseSwapSurfaceFormat(
     const std::vector<VkSurfaceFormatKHR> &availableFormats
 ) {
     for (const auto &availableFormat: availableFormats) {
@@ -379,7 +379,7 @@ VkSurfaceFormatKHR Scop_SwapChain::chooseSwapSurfaceFormat(
     return availableFormats[0];
 }
 
-VkPresentModeKHR Scop_SwapChain::chooseSwapPresentMode(
+VkPresentModeKHR Scop_Swap_Chain::chooseSwapPresentMode(
     const std::vector<VkPresentModeKHR> &availablePresentModes
 ) {
     for (const auto &availablePresentMode: availablePresentModes) {
@@ -400,7 +400,7 @@ VkPresentModeKHR Scop_SwapChain::chooseSwapPresentMode(
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-VkExtent2D Scop_SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities) {
+VkExtent2D Scop_Swap_Chain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities) {
     if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
         return capabilities.currentExtent;
     } else {
@@ -418,7 +418,7 @@ VkExtent2D Scop_SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capa
     }
 }
 
-VkFormat Scop_SwapChain::findDepthFormat() {
+VkFormat Scop_Swap_Chain::findDepthFormat() {
     return device.findSupportedFormat(
         {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
         VK_IMAGE_TILING_OPTIMAL,

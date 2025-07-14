@@ -10,17 +10,17 @@
 #include "Scop_Device.hpp"
 
 namespace scop {
-class Scop_SwapChain {
+class Scop_Swap_Chain {
 public:
     static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-    Scop_SwapChain(Scop_Device &deviceRef, VkExtent2D windowExtent);
+    Scop_Swap_Chain(Scop_Device &deviceRef, VkExtent2D windowExtent);
 
-    ~Scop_SwapChain();
+    ~Scop_Swap_Chain();
 
-    Scop_SwapChain(const Scop_SwapChain &) = delete;
+    Scop_Swap_Chain(const Scop_Swap_Chain &) = delete;
 
-    void operator=(const Scop_SwapChain &) = delete;
+    void operator=(const Scop_Swap_Chain &) = delete;
 
     VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
     VkRenderPass getRenderPass() { return renderPass; }

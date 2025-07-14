@@ -2,6 +2,11 @@
 // Enable beta extensions (needed for VK_KHR_portability_subset)
 #define VK_ENABLE_BETA_EXTENSIONS
 
+// added because of error
+#ifndef VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME
+#define VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME "VK_KHR_portability_subset"
+#endif
+
 #include "Scop_Window.hpp"
 
 // std-lib headers
