@@ -17,5 +17,7 @@ add_executable(ft_scop main.cpp
         Scope_Pipeline.cpp
         Scope_Pipeline.hpp
         Scop_Device.cpp
-        Scop_Device.hpp)
+        Scop_Device.hpp
+        Scop_Swap_Chain.cpp
+        Scop_Swap_Chain.hpp)
 target_link_libraries(ft_scop glfw vulkan)

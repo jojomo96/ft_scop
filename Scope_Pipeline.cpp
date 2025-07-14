@@ -4,6 +4,7 @@
 
 #include "Scope_Pipeline.hpp"
 
+#include <cassert>
 #include <fstream>
 #include <iostream>
 
@@ -42,12 +43,6 @@ Pipeline_Config_Info Scope_Pipeline::default_pipeline_config_info(
 
     config_info.scissor.offset = {0, 0};
     config_info.scissor.extent = {width, height};
-
-    config_info.viewport_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    config_info.viewport_info.viewportCount = 1;
-    config_info.viewport_info.pViewports = &config_info.viewport;
-    config_info.viewport_info.scissorCount = 1;
-    config_info.viewport_info.pScissors = &config_info.scissor;
 
     config_info.rasterization_info.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     config_info.rasterization_info.depthClampEnable = VK_FALSE;
@@ -127,6 +122,8 @@ void Scope_Pipeline::create_graphics_pipeline(
     const std::string &frag_file_path,
     const Pipeline_Config_Info &config_info
 ) {
+    assert(config_info.pipeline_layout != VK_NULL_HANDLE && "Pipeline layout must be set");
+    assert(config_info.render_pass != VK_NULL_HANDLE && "Render pass must be set for graphics pipeline");
     auto vert_code = read_file(vert_file_path);
     auto frag_code = read_file(frag_file_path);
 
@@ -156,14 +153,22 @@ void Scope_Pipeline::create_graphics_pipeline(
     vertex_input_info.pVertexAttributeDescriptions = nullptr;
     vertex_input_info.pVertexBindingDescriptions = nullptr;
 
+    VkPipelineViewportStateCreateInfo viewport_info{};
+    viewport_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    viewport_info.viewportCount = 1;
+    viewport_info.pViewports = &config_info.viewport;
+    viewport_info.scissorCount = 1;
+    viewport_info.pScissors = &config_info.scissor;
+
     VkGraphicsPipelineCreateInfo pipeline_info{};
     pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     pipeline_info.stageCount = 2;
     pipeline_info.pStages = shader_stages;
     pipeline_info.pVertexInputState = &vertex_input_info;
     pipeline_info.pInputAssemblyState = &config_info.input_assembly_info;
-    pipeline_info.pViewportState = &config_info.viewport_info;
+    pipeline_info.pViewportState = &viewport_info;
     pipeline_info.pRasterizationState = &config_info.rasterization_info;
+    pipeline_info.pMultisampleState = &config_info.multisample_info;
     pipeline_info.pColorBlendState = &config_info.color_blend_info;
     pipeline_info.pDepthStencilState = &config_info.depth_stencil_info;
     pipeline_info.pDynamicState = nullptr; // Optional
@@ -182,7 +187,7 @@ void Scope_Pipeline::create_graphics_pipeline(
             &pipeline_info,
             nullptr,
             &graphics_pipeline
-    ) != VK_SUCCESS) {
+        ) != VK_SUCCESS) {
         throw std::runtime_error("failed to create graphics pipeline!");
     }
 }
